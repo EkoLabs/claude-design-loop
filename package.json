@@ -1,6 +1,6 @@
 {
   "name": "@ekolabs/claude-design-loop",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Round-trip design loop between your IDE and claude.ai/design. Capture a route, send a brief, iterate visually with Claude, fetch the handoff bundle, translate it into framework-native scaffolds, and verify the result.",
   "license": "SEE LICENSE IN LICENSE",
   "private": false,

@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.2.3] - 2026-05-15
+
+### Fixed
+- **`pnpm exec design-loop` crashed with `ERR_MODULE_NOT_FOUND` after a
+  fresh `github:` install.** pnpm's git-install layout puts the commit
+  SHA in the directory name (e.g. `.../claude-design-loop.git#<sha>/`).
+  The bin shim was passing a raw absolute path to `await import()`,
+  which Node converts to a `file://` URL — and treats the `#` as a URL
+  fragment, truncating the path. Now goes through `pathToFileURL` so
+  `#` (and any other special chars, e.g. spaces on Windows) are
+  properly percent-encoded. Affected every consumer using
+  `pnpm exec design-loop`, `pnpm design`, or any pnpm-driven invocation
+  of the bin. `node node_modules/@ekolabs/.../dist/cli.js` was the
+  workaround. npm / direct-`node` invocations were unaffected.
+
 ### Changed
 - README: clarified that `pnpm install` / `npm install` does NOT
   re-fetch the latest commit when tracking `main`, because lockfiles
