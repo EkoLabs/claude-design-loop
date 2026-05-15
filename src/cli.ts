@@ -67,7 +67,7 @@ const program = new Command();
 program
   .name('design-loop')
   .description('Round-trip design loop between your IDE and claude.ai/design')
-  .version('0.2.1');
+  .version('0.2.2');
 
 // Default action: when no subcommand is supplied, drop into the wizard.
 program

@@ -153,7 +153,7 @@ function buildCursorPrompt(opts: {
     '1. Read the JSX files in the sources directory. Build a mental model of the component tree, props, and layout.',
   );
   lines.push(
-    `2. Translate the JSX into ${formatHint(opts.framework)} markup inside the live route file (or factor large sections into \`${suggestComponentDir(opts.routesDir)}/\`).`,
+    `2. Translate the JSX into ${formatHint(opts.framework)} markup inside the live route file (or factor large sections into \`${suggestComponentDir(opts.routesDir, opts.framework)}/\`).`,
   );
   lines.push(
     "3. Wire data from the route's existing loader. If the design needs fields the loader doesn't return, propose the loader patch — don't invent mock data.",
@@ -161,7 +161,7 @@ function buildCursorPrompt(opts: {
   lines.push(
     "4. Keep the CSS from the scaffold's `<style>` block intact (those are the design tokens). Inline it on the route or extract to a shared stylesheet — your judgement.",
   );
-  lines.push(`5. Use ${idiomHint(opts.framework)}. Don't carry React patterns over.`);
+  lines.push(`5. Use ${idiomHint(opts.framework)}.${opts.framework === 'svelte' || opts.framework === 'vue' ? " Don't carry React patterns over." : ''}`);
   lines.push("6. Don't add dependencies that aren't already in the project's `package.json`.");
   lines.push(
     '7. After the merge, run the dev server and confirm the route renders without console errors.',
@@ -214,12 +214,21 @@ function mapRouteToFile(
   return `${rel}${trimmed ? `/${trimmed}` : ''} (the file rendering this route)`;
 }
 
-function suggestComponentDir(routesDir: string): string {
-  // Heuristic: dashboard/src/routes -> dashboard/src/lib/components.
-  // Falls back to <routesDir>/_components for unknown layouts.
-  const guess = routesDir.replace(/\/routes\/?$/, '/lib/components');
-  if (guess !== routesDir) return guess.replace(/\/+$/, '');
-  return `${routesDir.replace(/\/+$/, '')}/_components`;
+function suggestComponentDir(routesDir: string, framework: string): string {
+  const trimmed = routesDir.replace(/\/+$/, '');
+  // SvelteKit: dashboard/src/routes -> dashboard/src/lib/components.
+  if (framework === 'svelte') {
+    const guess = trimmed.replace(/\/routes$/, '/lib/components');
+    if (guess !== trimmed) return guess;
+    return `${trimmed}/_components`;
+  }
+  // Next.js: src/app or src/pages -> src/components (the dominant convention).
+  if (framework === 'react') {
+    const guess = trimmed.replace(/\/(app|pages)$/, '/components');
+    if (guess !== trimmed) return guess;
+    return `${trimmed}/_components`;
+  }
+  return `${trimmed}/_components`;
 }
 
 function formatHint(framework: string): string {

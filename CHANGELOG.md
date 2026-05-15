@@ -6,6 +6,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-05-15
+
+### Changed
+- README: install instructions now recommend tracking `main`
+  (`github:EkoLabs/claude-design-loop`) as the default. Tag-pinned
+  installs (`#vX.Y.Z`) are still documented as the recommended choice
+  for shared CI/CD and any repo that needs reproducible installs.
+- README: corrected stale spots that listed only `'svelte' | 'html'` as
+  framework options — `'react'` (Next.js) is fully supported as of
+  v0.2.0.
+- Cursor handoff prompt (`CURSOR_PROMPT.md`) is now framework-aware:
+  - `suggestComponentDir` now suggests `src/components` for Next.js
+    projects (the dominant convention) instead of an awkward
+    `src/app/_components`. SvelteKit's `lib/components` heuristic is
+    preserved.
+  - The "Don't carry React patterns over" instruction is now only
+    emitted for Svelte/Vue targets — emitting it for React consumers
+    was confusing because the bundle's source IS React.
+
 ## [0.2.1] - 2026-05-15
 
 ### Added

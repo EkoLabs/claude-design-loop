@@ -108,13 +108,17 @@ Pick `[w]` to keep designing in the browser. Pick `[f]` when you're happy — th
 
 ## Installation details
 
-### Pinning a version
+### Tracking `main` vs. pinning a tag
+
+The default install string in the [Quickstart](#1-install-the-package--playwright) tracks `main`, so `pnpm install` (or `npm install`) always pulls the latest commit. That's the recommended setup for this tool — it's small, internal, and we want hotfixes to reach you the next time you `install` without anyone needing to bump a `package.json`. Tradeoff: a fresh `install` on day N can produce different bits than day N-1, so don't depend on this in CI for shared environments.
+
+To pin to a specific release for reproducible installs, suffix the install string with `#vX.Y.Z`:
 
 ```bash
-pnpm add -D github:EkoLabs/claude-design-loop#v0.1.0
+pnpm add -D github:EkoLabs/claude-design-loop#v0.2.1
 ```
 
-Pin to a tag in shared environments to avoid surprise updates.
+Pinning is recommended in shared CI/CD environments and any repo that values build determinism over auto-updates. See [`CHANGELOG.md`](./CHANGELOG.md) for the list of releases.
 
 ### Global install
 
@@ -135,9 +139,9 @@ Drop a `.design-loop.config.ts` (or `.js` / `.mjs` / `.mts`) at your repo root:
 import { defineConfig } from '@ekolabs/claude-design-loop';
 
 export default defineConfig({
-  framework: 'svelte',          // 'svelte' | 'html'
+  framework: 'svelte',          // 'svelte' | 'react' | 'html'
   devUrl: 'http://localhost:5173',
-  routesDir: 'src/routes',
+  routesDir: 'src/routes',      // 'src/app' (Next.js App) or 'src/pages' (Pages)
   excludeRoutes: ['/admin'],
 
   // Single ref OR an array (first = default; the wizard shows a picker
@@ -165,7 +169,7 @@ export default defineConfig({
 
 | Key | Required | Default | Notes |
 |---|---|---|---|
-| `framework` | yes | — | `'svelte'` or `'html'`. New adapters: see [`CONTRIBUTING.md`](./CONTRIBUTING.md). |
+| `framework` | yes | — | `'svelte'`, `'react'` (Next.js App or Pages Router), or `'html'`. New adapters: see [`CONTRIBUTING.md`](./CONTRIBUTING.md). |
 | `devUrl` | yes | — | URL of your running dev server. Routes are appended to it for capture. |
 | `routesDir` | yes | — | Where the wizard scans for routable files. |
 | `excludeRoutes` | no | `[]` | Hide these from the route picker. Prefix matches: `'/admin'` hides `/admin/*`. |
@@ -304,7 +308,7 @@ Full type signatures live in [`dist/index.d.ts`](./dist/index.d.ts) (built; not 
 
 **"No design system named X exists on your claude.ai/design account"** — your config has a name that doesn't match anything Anthropic has published for your account. Run `design-loop systems` to see the actual names + ids and update your config.
 
-**Bundle bundle is empty / `apply` produces nothing** — Anthropic's handoff sometimes ships only CSS + JSX with an empty `<body>`. The Svelte adapter handles this case (inlines CSS, copies JSX with a hint for the next agent). If you see truly empty output, open the bundle folder manually — `bundle/canvas.html` is the source of truth.
+**Bundle is empty / `apply` produces nothing** — Anthropic's handoff sometimes ships only CSS + JSX with an empty `<body>`. The Svelte and Next.js adapters both handle this case (inlines CSS, copies the source files with a hint for the next agent). If you see truly empty output, open the bundle folder manually — `bundle/canvas.html` is the source of truth.
 
 ---
 
