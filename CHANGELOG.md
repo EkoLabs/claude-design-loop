@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+- README: clarified that `pnpm install` / `npm install` does NOT
+  re-fetch the latest commit when tracking `main`, because lockfiles
+  pin GitHub deps to a SHA on first install. Teammates upgrading must
+  explicitly `pnpm update @ekolabs/claude-design-loop` (or `npm update
+  ...`). Documented prominently in the install section.
+
 ## [0.2.2] - 2026-05-15
 
 ### Changed

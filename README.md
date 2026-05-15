@@ -110,12 +110,18 @@ Pick `[w]` to keep designing in the browser. Pick `[f]` when you're happy — th
 
 ### Tracking `main` vs. pinning a tag
 
-The default install string in the [Quickstart](#1-install-the-package--playwright) tracks `main`, so `pnpm install` (or `npm install`) always pulls the latest commit. That's the recommended setup for this tool — it's small, internal, and we want hotfixes to reach you the next time you `install` without anyone needing to bump a `package.json`. Tradeoff: a fresh `install` on day N can produce different bits than day N-1, so don't depend on this in CI for shared environments.
+The default install string in the [Quickstart](#1-install-the-package--playwright) tracks `main`, so the package can ship hotfixes to you without anyone bumping a `package.json`. To upgrade to whatever's currently on `main`:
+
+```bash
+pnpm update @ekolabs/claude-design-loop          # or: npm update @ekolabs/claude-design-loop
+```
+
+> **Why `update`, not `install`?** `npm`/`pnpm` resolve `github:` refs to a specific commit SHA in your lockfile on first install. A subsequent `install` re-uses that same SHA — it does **not** re-fetch the latest. `update <pkg>` is the explicit "go get the newest commit on the configured ref" command. This is true for any GitHub-backed dependency, not just this one.
 
 To pin to a specific release for reproducible installs, suffix the install string with `#vX.Y.Z`:
 
 ```bash
-pnpm add -D github:EkoLabs/claude-design-loop#v0.2.1
+pnpm add -D github:EkoLabs/claude-design-loop#v0.2.2
 ```
 
 Pinning is recommended in shared CI/CD environments and any repo that values build determinism over auto-updates. See [`CHANGELOG.md`](./CHANGELOG.md) for the list of releases.
