@@ -6,6 +6,38 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-05-15
+
+### Added
+- **Automatic `.gitignore` management** so loop run artifacts (bundles,
+  screenshots, scaffolds, manifests, lockfile) can never be accidentally
+  committed:
+  - `design-loop init` appends a two-line rule to the consumer's root
+    `.gitignore`:
+
+    ```
+    design-loops/*
+    !design-loops/.gitignore
+    ```
+
+    The first line ignores loop run output; the second line propagates
+    the sub-`.gitignore` to teammates via normal git workflow.
+    Idempotent — recognises any pre-existing rule that already covers
+    `loopsDir` (`design-loops`, `design-loops/`, `design-loops/*`) and
+    refuses to clobber existing entries.
+  - Every loop run plants a sub-`.gitignore` inside `<loopsDir>/` with
+    `*\n!.gitignore\n` as a second-layer defense — protects even if
+    the root rule is removed/edited. Customised sub-gitignores are
+    preserved.
+- README: new "Loop artifacts & cleanup" section explaining what lives
+  under `loopsDir/`, the two-layer gitignore strategy, manual cleanup
+  recipes, and where the persistent auth state lives (outside the repo).
+
+### Changed
+- README: clarified that `framework: 'react'` is supported (Next.js
+  App Router and Pages Router) — the docs were stale from the v0.2.0
+  adapter addition.
+
 ## [0.2.0] - 2026-05-15
 
 ### Added

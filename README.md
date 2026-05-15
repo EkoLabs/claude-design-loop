@@ -35,11 +35,11 @@ pnpm exec playwright install chromium    # ~150MB, one-time per machine
 pnpm exec design-loop init
 ```
 
-This writes a `.design-loop.config.ts` with sensible defaults. Open it and fill in:
+This writes a `.design-loop.config.ts` with sensible defaults and adds `design-loops/` to your repo's root `.gitignore` (creating it if needed) so loop run artifacts are never accidentally committed. See [Loop artifacts & cleanup](#loop-artifacts--cleanup) for details. Open the config and fill in:
 
-- `framework` — `'svelte'` or `'html'`
+- `framework` — `'svelte'`, `'react'` (Next.js), or `'html'`
 - `devUrl` — your dev-server URL (e.g. `http://localhost:5173`)
-- `routesDir` — where the wizard scans for routable files
+- `routesDir` — where the wizard scans for routable files (`src/routes` for SvelteKit; `src/app` or `src/pages` for Next.js)
 
 Leave `designSystem.id` as an empty string for now — you'll fill it in step 4.
 
@@ -228,6 +228,37 @@ design-loops/2026-05-15T14-16-34-489-root/
     ├── CURSOR_PROMPT.md  ← ready-to-paste IDE prompt
     └── APPLY_SUMMARY.md  ← what was generated and why
 ```
+
+---
+
+## Loop artifacts & cleanup
+
+Everything under `loopsDir/` (default: `design-loops/`) is **local working state** — bundles, screenshots, scaffolds, manifests, and the per-repo lockfile. None of it should ever be committed to version control. The package handles this with two complementary, idempotent safety nets:
+
+1. **`design-loop init`** appends a two-line rule to your repo's root `.gitignore`:
+
+    ```
+    design-loops/*
+    !design-loops/.gitignore
+    ```
+
+    The first line ignores all loop run output; the second line punches a hole for the sub-`.gitignore` (see below) so it propagates through git to teammates. `init` recognises any pre-existing rule that already covers `loopsDir` (`design-loops`, `design-loops/`, `design-loops/*`) and does nothing in that case — never clobbers customisations.
+
+2. **Every loop run** plants `loopsDir/.gitignore` with `*\n!.gitignore\n` as a second-layer defense — so even if someone edits or removes the root rule, the directory's own gitignore prevents accidental commits. Because of the `!design-loops/.gitignore` exception in the root rule, this sub-`.gitignore` _is_ tracked by git: commit it once and your teammates inherit the protection automatically without having to run `init`. If you've customised the sub-`.gitignore` (e.g. to track a specific loop) we leave it alone.
+
+### Cleanup
+
+There's no automated GC yet — loops accumulate over time and each one is typically 10–50 MB. When `loopsDir/` gets too big, just delete the old folders:
+
+```bash
+# delete every loop run
+rm -rf design-loops/2026-*
+
+# or keep the most recent 10
+ls -1t design-loops/ | tail -n +11 | xargs -I{} rm -rf "design-loops/{}"
+```
+
+The persistent Chromium profile and your `claude.ai/design` auth state live in `~/.config/design-loop/`, **outside the repo**. Delete that folder if you want to fully sign out.
 
 ---
 

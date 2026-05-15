@@ -45,6 +45,7 @@ import { Command } from 'commander';
 import { existsSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { loadConfig } from './config.ts';
+import { ensureRootGitignoreEntry } from './lib/gitignore.ts';
 import { runApply } from './lib/apply.ts';
 import { runBrief } from './lib/brief.ts';
 import {
@@ -66,7 +67,7 @@ const program = new Command();
 program
   .name('design-loop')
   .description('Round-trip design loop between your IDE and claude.ai/design')
-  .version('0.2.0');
+  .version('0.2.1');
 
 // Default action: when no subcommand is supplied, drop into the wizard.
 program
@@ -459,6 +460,18 @@ export default defineConfig({
 `;
     writeFileSync(dest, stub, 'utf8');
     console.log(`Wrote ${dest}.`);
+
+    // Also keep the consumer's repo-level .gitignore current so loop run
+    // artifacts (bundles, screenshots, scaffolds, lockfile) are never
+    // accidentally committed. Default loopsDir matches the stub above.
+    const gi = ensureRootGitignoreEntry(process.cwd(), 'design-loops');
+    const rule = `${gi.entries[0]} (with \`${gi.entries[1]}\`)`;
+    if (gi.action === 'created') {
+      console.log(`Created ${gi.path} with \`${rule}\`.`);
+    } else if (gi.action === 'appended') {
+      console.log(`Added \`${rule}\` to ${gi.path}.`);
+    }
+
     console.log(`Next: \`design-loop login\`, then \`design-loop\` for the wizard.`);
   });
 

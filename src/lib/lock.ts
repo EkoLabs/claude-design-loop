@@ -19,12 +19,12 @@
 
 import {
   existsSync,
-  mkdirSync,
   readFileSync,
   unlinkSync,
   writeFileSync,
 } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { resolve } from 'node:path';
+import { ensureLoopsRootGitignore } from './gitignore.ts';
 
 export interface LockInfo {
   pid: number;
@@ -78,8 +78,11 @@ export function checkLock(loopsRoot: string): CheckResult {
 const NOOP_LOCK: Lock = { release: () => {} };
 
 export function acquireLock(loopsRoot: string, opts: AcquireOptions): Lock {
+  // Side-effect: also creates `loopsRoot` (recursively) and plants the
+  // sub-`.gitignore` so loop run artifacts can't be accidentally committed
+  // even if the consumer never ran `design-loop init`.
+  ensureLoopsRootGitignore(loopsRoot);
   const path = lockPath(loopsRoot);
-  mkdirSync(dirname(path), { recursive: true });
 
   const existing = checkLock(loopsRoot);
 

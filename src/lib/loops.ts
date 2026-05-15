@@ -7,7 +7,8 @@
  */
 
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
+import { ensureLoopsRootGitignore } from './gitignore.ts';
 
 export interface LoopPaths {
   id: string;
@@ -85,6 +86,10 @@ export function loopPaths(loopsRoot: string, id: string): LoopPaths {
 }
 
 export function ensureLoopDirs(paths: LoopPaths): void {
+  // Plant the sub-`.gitignore` in loopsRoot before the loop subdir is
+  // created, so even capture-only flows (`brief` without `submit`) get
+  // the safety net. Idempotent.
+  ensureLoopsRootGitignore(dirname(paths.root));
   mkdirSync(paths.root, { recursive: true });
   mkdirSync(paths.inputsDir, { recursive: true });
 }
