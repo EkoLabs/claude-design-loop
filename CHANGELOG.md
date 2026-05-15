@@ -6,6 +6,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-05-15
+
+### Added
+- **Next.js adapter** (`framework: 'react'`) — full route discovery for both
+  App Router (`page.{tsx,jsx,ts,js}` under `src/app` or `app`) and Pages
+  Router (`src/pages` or `pages`), respecting Next.js conventions: route
+  groups `(group)`, parallel routes `@slot`, private folders `_*`,
+  intercepting routes, and reserved files (`_app`, `_document`, `_error`,
+  `404`, `500`, `api/`). Apply emits `.tsx` component scaffolds with CSS
+  Modules and copies sibling assets, mirroring the Svelte adapter's shape.
+- Validated end-to-end against a real Next.js 14 App Router project
+  (`eko-file-editor`).
+
+### Changed
+- `design-loop init` stub now documents the `react` framework option
+  alongside `svelte` and `html`, and lists conventional `routesDir` values
+  for each.
+
+### Fixed
+- Suppress Node 24's `MODULE_TYPELESS_PACKAGE_JSON` warning when loading
+  the consumer's `.design-loop.config.ts`. The warning fired on every run
+  in any consumer whose `package.json` lacked `"type": "module"` (typical
+  for Next.js apps). The reparsing it warned about is a no-op for one
+  small config file, so we filter just this warning at CLI startup.
+
 ## [0.1.0] - 2026-05-15
 
 Initial extraction from `product-media-pipeline`.

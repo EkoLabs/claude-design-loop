@@ -17,6 +17,30 @@
  *   design-loop init
  */
 
+// Silence Node 24's `MODULE_TYPELESS_PACKAGE_JSON` warning. We dynamic-
+// import the consumer's `.design-loop.config.ts`; if their package.json
+// has no `"type": "module"` (typical for Next.js apps), Node prints a
+// noisy reparsing warning. The reparse is a no-op for one tiny file, so
+// hide the warning rather than make every consumer edit their
+// package.json. All other warnings still flow through.
+{
+  const originalEmit = process.emit.bind(process);
+  // @ts-expect-error - process.emit overload signature
+  process.emit = function patchedEmit(event: string, value: unknown, ...rest: unknown[]) {
+    if (
+      event === 'warning' &&
+      value &&
+      typeof value === 'object' &&
+      'code' in (value as Record<string, unknown>) &&
+      (value as { code?: string }).code === 'MODULE_TYPELESS_PACKAGE_JSON'
+    ) {
+      return false;
+    }
+    // @ts-expect-error - forwarding args verbatim
+    return originalEmit(event, value, ...rest);
+  };
+}
+
 import { Command } from 'commander';
 import { existsSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -42,7 +66,7 @@ const program = new Command();
 program
   .name('design-loop')
   .description('Round-trip design loop between your IDE and claude.ai/design')
-  .version('0.1.0');
+  .version('0.2.0');
 
 // Default action: when no subcommand is supplied, drop into the wizard.
 program
@@ -398,16 +422,20 @@ program
     const stub = `import { defineConfig } from '@ekolabs/claude-design-loop';
 
 export default defineConfig({
-  // Framework adapter. Currently supported: 'svelte' | 'html'.
-  // (Add adapters by exporting them via @ekolabs/claude-design-loop/adapters.)
+  // Framework adapter. Currently supported:
+  //   - 'svelte'  (SvelteKit; +page.svelte route discovery)
+  //   - 'react'   (Next.js App Router or Pages Router)
+  //   - 'html'    (static HTML projects)
   framework: 'svelte',
 
   // URL of your running dev server. The wizard captures screenshots from
   // \`\${devUrl}\${route}\` for each breakpoint.
   devUrl: 'http://localhost:5173',
 
-  // Where the wizard scans for routable files. SvelteKit ships +page.svelte;
-  // the scanner respects (group)/_private folder conventions.
+  // Where the wizard scans for routable files.
+  //   - SvelteKit:                 'src/routes'
+  //   - Next.js App Router:        'src/app' (or 'app' if no src dir)
+  //   - Next.js Pages Router:      'src/pages' (or 'pages' if no src dir)
   routesDir: 'src/routes',
 
   // Routes you NEVER want surfaced in the wizard's route picker.

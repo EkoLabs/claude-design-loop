@@ -7,12 +7,13 @@ import type { Framework } from '../config.ts';
 import type { Adapter } from './types.ts';
 import { svelteAdapter } from './svelte.ts';
 import { htmlAdapter } from './html.ts';
+import { nextjsAdapter } from './nextjs.ts';
 
 const stub = (name: string): Adapter => ({
   name,
   async apply() {
     throw new Error(
-      `Adapter \`${name}\` is not implemented yet. Add packages/design-loop/src/adapters/${name}.ts and register it in adapters/index.ts.`,
+      `Adapter \`${name}\` is not implemented yet. Add src/adapters/${name}.ts and register it in adapters/index.ts.`,
     );
   },
   async discoverRoutes() {
@@ -25,7 +26,10 @@ const stub = (name: string): Adapter => ({
 const REGISTRY: Record<Framework, Adapter> = {
   svelte: svelteAdapter,
   html: htmlAdapter,
-  react: stub('react'),
+  // `react` is the Next.js adapter — Next.js is the dominant React framework
+  // we target. If we ever need a non-Next.js React adapter, add it as a new
+  // framework key (e.g. `react-vite`) rather than splitting `react`.
+  react: nextjsAdapter,
   vue: stub('vue'),
 };
 
