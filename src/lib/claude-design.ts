@@ -617,6 +617,16 @@ async function assertLoggedIn(page: Page, headed: boolean): Promise<void> {
 
 async function fillNewProject(page: Page, opts: SubmitOptions): Promise<void> {
   console.log(`[submit] creating project "${opts.projectName}" ...`);
+
+  // claude.ai/design ships a "Skip intro" onboarding overlay on first
+  // project creation per session. It intercepts pointer events on the
+  // form below it (most visibly: the Create button click times out).
+  // Dismiss it eagerly so every later interaction in this function
+  // works against the real form. Once dismissed it stays dismissed for
+  // the persistent profile, so on subsequent runs the locator never
+  // resolves and we fall through silently.
+  await dismissOnboardingOverlay(page);
+
   const nameBox = page.getByRole('textbox', { name: 'Project name' });
   await nameBox.fill(opts.projectName);
 
@@ -660,6 +670,37 @@ async function fillNewProject(page: Page, opts: SubmitOptions): Promise<void> {
  */
 function createButtonLocator(page: Page): import('playwright').Locator {
   return page.locator('[data-testid="create-project-button"]');
+}
+
+/**
+ * Best-effort dismissal of the "Skip intro" onboarding overlay that
+ * claude.ai/design started shipping in mid-2026. It pops up on first
+ * project creation per session and intercepts pointer events on the
+ * form behind it — most visibly causing the Create button click to
+ * time out. We try a 1.5s wait and silently fall through if it never
+ * appears (subsequent runs in the persistent profile never see it).
+ *
+ * Multiple selectors because Anthropic has rotated the button copy in
+ * past UI revisions and a single role-name match is brittle.
+ */
+async function dismissOnboardingOverlay(page: Page): Promise<void> {
+  const candidates = [
+    page.getByRole('button', { name: /^Skip intro$/i }),
+    page.getByRole('button', { name: /^Skip$/i }),
+    page.locator('button:has-text("Skip intro")'),
+  ];
+  for (const locator of candidates) {
+    try {
+      await locator.first().waitFor({ state: 'visible', timeout: 1500 });
+      console.log('[submit] dismissing onboarding overlay');
+      await locator.first().click({ timeout: 2000 });
+      // Let the overlay animate out before any subsequent interaction.
+      await page.waitForTimeout(400);
+      return;
+    } catch {
+      /* not present on this run — try the next candidate */
+    }
+  }
 }
 
 /**

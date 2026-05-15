@@ -67,7 +67,7 @@ const program = new Command();
 program
   .name('design-loop')
   .description('Round-trip design loop between your IDE and claude.ai/design')
-  .version('0.2.3');
+  .version('0.2.4');
 
 // Default action: when no subcommand is supplied, drop into the wizard.
 program
@@ -106,7 +106,8 @@ program
     'Drive claude.ai/design end-to-end for an existing loop: open project, attach screenshots, send brief, wait for the first design pass, then hand control to an interactive terminal prompt for review/iterate/fetch.',
   )
   .argument('<loopId>', 'loop id (the directory name under design-loops/)')
-  .option('--headed', 'show the browser window (recommended for review)')
+  .option('--headed', 'show the browser window (recommended for review)', true)
+  .option('--no-headed', 'run the browser headless (CI / quick smoke tests)')
   .option(
     '--fidelity <fidelity>',
     'wireframe | high-fidelity (default: high-fidelity)',
@@ -159,7 +160,8 @@ program
     '--project-url <url>',
     'override the manifest-saved project URL (claude.ai/design/p/...)',
   )
-  .option('--headed', 'show the browser window (recommended)')
+  .option('--headed', 'show the browser window (recommended)', true)
+  .option('--no-headed', 'run the browser headless (CI / quick smoke tests)')
   .option(
     '--no-interactive',
     'skip the terminal review prompt \u2014 exit after the first settle',
@@ -201,7 +203,8 @@ program
     '--project-url <url>',
     'override the manifest-saved project URL (claude.ai/design/p/...)',
   )
-  .option('--headed', 'show the browser window')
+  .option('--headed', 'show the browser window', true)
+  .option('--no-headed', 'run the browser headless (CI / quick smoke tests)')
   .option(
     '--no-pull',
     'just capture the bundle URL, don\'t auto-pull (you\'ll need to run pull yourself)',
@@ -365,7 +368,8 @@ program
   .argument('<route>', 'route path, e.g. / or /canonical')
   .option('--breakpoints <list>', 'comma-separated viewport widths in px')
   .option('--intent <text>', 'optional one-line intent for this round')
-  .option('--headed', 'show the browser window')
+  .option('--headed', 'show the browser window', true)
+  .option('--no-headed', 'run the browser headless (CI / quick smoke tests)')
   .option('--fidelity <fidelity>', 'wireframe | high-fidelity (default: high-fidelity)')
   .option(
     '--no-interactive',

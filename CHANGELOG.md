@@ -6,6 +6,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.2.4] - 2026-05-15
+
+### Fixed
+- **`--headed` had no effect on `submit`, `resume`, `fetch`, and `loop`
+  subcommands** — the flag was defined on each subcommand without a
+  default value, so `opts.headed` resolved to `undefined` (falsy) and
+  the browser always launched headless, ignoring the user's `--headed`
+  intent. The program-level `--headed` flag (used by the wizard) was
+  unaffected. Each browser-driving subcommand now defines `--headed`
+  with `default: true` and a companion `--no-headed` to flip it,
+  matching the program-level pattern. So `pnpm design submit <id>`
+  now launches headed by default; pass `--no-headed` for CI / quick
+  smoke tests.
+- **`fillNewProject` timed out clicking the Create button on first
+  project creation per session** — claude.ai/design started shipping a
+  "Skip intro" onboarding overlay that intercepts pointer events on
+  the form behind it. We now best-effort dismiss the overlay
+  (1.5s wait + click) at the start of `fillNewProject`. Once
+  dismissed, the persistent Chromium profile never sees it again,
+  so the dismissal is a silent no-op on subsequent runs.
+
 ## [0.2.3] - 2026-05-15
 
 ### Fixed
