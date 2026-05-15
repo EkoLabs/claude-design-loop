@@ -1,0 +1,83 @@
+{
+  "name": "@ekolabs/claude-design-loop",
+  "version": "0.1.0",
+  "description": "Round-trip design loop between your IDE and claude.ai/design. Capture a route, send a brief, iterate visually with Claude, fetch the handoff bundle, translate it into framework-native scaffolds, and verify the result.",
+  "license": "SEE LICENSE IN LICENSE",
+  "private": false,
+  "type": "module",
+  "bin": {
+    "design-loop": "./bin/design-loop.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./adapters": {
+      "types": "./dist/adapters/index.d.ts",
+      "default": "./dist/adapters/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "bin",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "tsc --noEmit",
+    "prepare": "pnpm build",
+    "prepublishOnly": "pnpm build",
+    "design-loop": "tsx src/cli.ts"
+  },
+  "dependencies": {
+    "commander": "^14.0.3",
+    "picocolors": "^1.1.1"
+  },
+  "peerDependencies": {
+    "playwright": "^1.50.0"
+  },
+  "peerDependenciesMeta": {
+    "playwright": {
+      "optional": false
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.7",
+    "playwright": "^1.60.0",
+    "tsup": "^8.3.5",
+    "tsx": "^4.7.2",
+    "typescript": "^5.4.5",
+    "vitest": "^2.1.8"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "restricted"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/EkoLabs/claude-design-loop.git"
+  },
+  "homepage": "https://github.com/EkoLabs/claude-design-loop#readme",
+  "keywords": [
+    "claude",
+    "claude-design",
+    "design",
+    "design-system",
+    "ux",
+    "ui",
+    "playwright",
+    "svelte",
+    "cursor",
+    "anthropic"
+  ]
+}
