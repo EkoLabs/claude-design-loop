@@ -6,6 +6,34 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.2.5] - 2026-05-17
+
+### Fixed
+- **Consumer `pnpm install` fails when this package's `prepare` build
+  runs on Linux CI (Node 22)** — `tsup`'s DTS step (rollup-plugin-dts
+  inside a worker thread) fails parsing TS source with explicit `.ts`
+  extension imports on some OS/Node combinations, even though the
+  same source builds fine locally. Manifested as
+  `ERR_PNPM_PREPARE_PACKAGE` with `"Expected ',', got '{' (Note that
+  you need plugins to import files that are not JavaScript)"` in the
+  consumer's CI logs. Root cause is environment-specific tsup
+  behaviour, not the package's source.
+
+### Changed
+- **`dist/` is now committed to the repo.** Standard convention for
+  packages distributed via `github:` (no npm publish) — consumers
+  install in milliseconds with no build step on their runners, and
+  no Node-version / OS sensitivities. `prepare` still runs `tsup` if
+  `dist/` is missing (covers fresh dev clones), but skips the build
+  on consumer installs because `dist/` ships in the tarball. Dev
+  workflow: `pnpm build && git add dist/` before tagging a release.
+
+### Removed
+- README's "Installing in CI (private-repo auth)" section (added in
+  the prior unreleased entry) — the package repo went public, so
+  consumer CI doesn't need any auth wiring at all. Both the auth
+  workaround docs and the underlying problem are obsolete.
+
 ## [0.2.4] - 2026-05-15
 
 ### Fixed

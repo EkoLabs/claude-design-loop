@@ -126,6 +126,12 @@ pnpm add -D github:EkoLabs/claude-design-loop#v0.2.2
 
 Pinning is recommended in shared CI/CD environments and any repo that values build determinism over auto-updates. See [`CHANGELOG.md`](./CHANGELOG.md) for the list of releases.
 
+### Installing in CI
+
+The repo is **public** (the LICENSE stays proprietary — Eko-internal — so source-readability doesn't grant external usage rights). CI runners can fetch the package without any auth wiring; just `pnpm install --frozen-lockfile` works on fresh GitHub Actions / Vercel / etc. runners. No PAT, no GitHub App, no deploy key needed.
+
+Consumer installs also skip the build step — `dist/` ships in the package, so there's no `tsup`/Node-version sensitivity on your runners. Install is a few seconds.
+
 ### Global install
 
 If you want the bin available globally so you can drop the `pnpm exec` prefix:

@@ -1,6 +1,13 @@
 node_modules/
-dist/
 *.log
+
+# NOTE: `dist/` is intentionally tracked.
+# This package is consumed via `github:EkoLabs/claude-design-loop` (no npm
+# publish), so we ship pre-built output in the repo. Consumers' `pnpm install`
+# uses the committed `dist/` directly — no `prepare` build runs in their CI,
+# which avoids Node-version / OS-specific tsup+rollup-plugin-dts quirks on
+# their runners. To rebuild during dev: `pnpm build` (and commit the result
+# alongside source changes when cutting a release).
 .DS_Store
 .env
 .env.local
