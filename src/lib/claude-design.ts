@@ -594,9 +594,14 @@ export async function fetchHandoffBundleUrl(
 async function assertLoggedIn(page: Page, headed: boolean): Promise<void> {
   // The picker (logged in) shows a Design system combobox. The login wall
   // shows a Continue button or sign-in form. Anthropic also occasionally
-  // throws up a human-verification challenge that takes a moment to resolve.
-  // When running headed, give the user up to 5 minutes to handle that
-  // manually. When headless, fail fast — no human is there to solve it.
+  // throws up a Cloudflare "Performing security verification" challenge —
+  // we detect that explicitly so the user gets a clear log line rather
+  // than a silent wait, then fall through to the picker check.
+  await waitOutCloudflareChallenge(page);
+
+  // When running headed, give the user up to 5 minutes to handle any
+  // manual step (login, captcha, email verification). When headless,
+  // fail fast — no human is there to solve it.
   const timeout = headed ? 300_000 : 30_000;
   if (headed) {
     console.log(
@@ -612,6 +617,39 @@ async function assertLoggedIn(page: Page, headed: boolean): Promise<void> {
       "Couldn't find the Claude Design project picker. Either you're not logged in, the saved session expired, or a verification challenge wasn't solved in time.\n" +
         '\nFix: rerun with `--headed` and solve any prompts, or run `design-loop login` to refresh auth.',
     );
+  }
+}
+
+/**
+ * If Cloudflare's "Performing security verification" interstitial is
+ * showing, log a clear message and wait up to 2 minutes for it to
+ * clear before letting `assertLoggedIn` fall through to the picker
+ * check. No-op if no challenge is visible.
+ *
+ * Why this helper exists: without it, a CF challenge looks like a
+ * generic "waiting for project picker..." stall, which is confusing
+ * — especially because the user often *can* solve the challenge
+ * themselves (one click) but doesn't realize that's what they're
+ * looking at. With this helper, the log explicitly names the
+ * blocker and points at the browser.
+ */
+async function waitOutCloudflareChallenge(page: Page): Promise<void> {
+  const challenge = page.getByText('Performing security verification', { exact: false });
+  try {
+    await challenge.first().waitFor({ state: 'visible', timeout: 2000 });
+  } catch {
+    return; // no challenge — happy path
+  }
+  console.log(
+    '[submit] Cloudflare bot-check detected — waiting up to 2 min for it to clear (solve any prompts in the browser if needed)...',
+  );
+  try {
+    await challenge.first().waitFor({ state: 'hidden', timeout: 120_000 });
+    console.log('[submit] Cloudflare challenge cleared.');
+  } catch {
+    // Still up after 2 min — fall through. assertLoggedIn's main
+    // project-picker wait will fail with the existing helpful error
+    // message that points the user at `--headed` + `login`.
   }
 }
 

@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.2.6] - 2026-05-17
+
+### Changed
+- **Cloudflare bot-check is now logged explicitly.** When
+  `claude.ai/design` serves a "Performing security verification"
+  interstitial, we now log
+  `[submit] Cloudflare bot-check detected — waiting up to 2 min for it to clear...`
+  and wait for it to clear instead of letting the picker wait stall
+  silently. With `--headed` the user can solve any prompt in the
+  visible window and the script continues automatically; with
+  `--no-headed` the wait is bounded short and the run will fall
+  through to the existing picker error so users know to rerun
+  headed. README troubleshooting updated with a matching entry.
+
 ## [0.2.5] - 2026-05-17
 
 ### Fixed

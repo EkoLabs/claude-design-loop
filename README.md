@@ -314,7 +314,9 @@ Full type signatures live in [`dist/index.d.ts`](./dist/index.d.ts) (built; not 
 
 **"No saved Claude Design auth"** — run `design-loop login`. The browser will open to `claude.ai/design`; log in, then close the window when prompted.
 
-**"Couldn't find the project picker"** — your saved session expired or Anthropic served a verification challenge. Rerun the failing command with `--headed` and solve any challenges manually; the script will continue once it sees the New Project form.
+**"Cloudflare bot-check detected — waiting up to 2 min for it to clear..."** — Cloudflare's "Performing security verification" interstitial is showing on `claude.ai/design`. With a real browser fingerprint (i.e. `--headed`) it usually clears on its own within 30-60s; if it asks for a click, do it in the visible window and the script will continue. With `--no-headed` (headless) Chromium can't reliably pass Cloudflare's JS challenge, so the wait is bounded short and you'll likely fall through to the picker error below — rerun with `--headed`.
+
+**"Couldn't find the project picker"** — your saved session expired, Anthropic served a verification challenge that wasn't solved in time, or Cloudflare blocked a headless run. Rerun the failing command with `--headed` and solve any challenges manually; the script will continue once it sees the New Project form.
 
 **"Another design-loop session is running (pid=…)"** — the lockfile says someone else is driving the browser. If you're sure that pid is dead, the wizard offers a force-unlock prompt (`y` to take over). Or delete `<loopsDir>/.lock.json` manually.
 

@@ -2206,6 +2206,7 @@ async function fetchHandoffBundleUrl(opts) {
   }
 }
 async function assertLoggedIn(page, headed) {
+  await waitOutCloudflareChallenge(page);
   const timeout = headed ? 3e5 : 3e4;
   if (headed) {
     console.log(
@@ -2218,6 +2219,22 @@ async function assertLoggedIn(page, headed) {
     throw new Error(
       "Couldn't find the Claude Design project picker. Either you're not logged in, the saved session expired, or a verification challenge wasn't solved in time.\n\nFix: rerun with `--headed` and solve any prompts, or run `design-loop login` to refresh auth."
     );
+  }
+}
+async function waitOutCloudflareChallenge(page) {
+  const challenge = page.getByText("Performing security verification", { exact: false });
+  try {
+    await challenge.first().waitFor({ state: "visible", timeout: 2e3 });
+  } catch {
+    return;
+  }
+  console.log(
+    "[submit] Cloudflare bot-check detected \u2014 waiting up to 2 min for it to clear (solve any prompts in the browser if needed)..."
+  );
+  try {
+    await challenge.first().waitFor({ state: "hidden", timeout: 12e4 });
+    console.log("[submit] Cloudflare challenge cleared.");
+  } catch {
   }
 }
 async function fillNewProject(page, opts) {
